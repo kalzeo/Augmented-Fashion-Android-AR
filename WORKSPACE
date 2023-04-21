@@ -2,21 +2,6 @@ workspace(name = "mediapipe")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-android_sdk_repository(
-    name = "androidsdk",
-    api_level = 33,  # The Android API level you want to target
-    build_tools_version = "33.0.2",  # The version of the Android build tools you want to use
-    path = "/home/kyle/Android/Sdk",  # The path to your Android SDK installation
-)
-
-android_ndk_repository(
-    name = "androidndk",
-    path = "/home/kyle/Android/Sdk/ndk/21.4.7075529/",  # The path to your Android NDK installation
-    api_level = 21,  # The Android API level you want to target
-)
-
-
-
 # Protobuf expects an //external:python_headers target
 bind(
     name = "python_headers",
