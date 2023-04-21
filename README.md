@@ -123,7 +123,7 @@ These commands must be executed through the terminal and may require sudo privil
    >
    > The resources location should be something like:
    > /home/{YOUR USERNAME}/StudioProjects/Augmented-Fashion-Android-AR/mediapipe/projects/android/src/java/com/google/mediapipe/apps/camera/res
-5. The `android_sdk_repository` and `android_ndk_repository` paths will need to be configured in the WORKSPACE file found in the root directory. Run the following script to set these up: `sh setup_workspace_sdk_ndk_paths.sh`
+5. **IMPORTANT:** The `android_sdk_repository` and `android_ndk_repository` paths will need to be configured in the WORKSPACE file found in the root directory before any building can be done. Run the following script to set these up: `sh setup_workspace_sdk_ndk_paths.sh`
 
 
 
