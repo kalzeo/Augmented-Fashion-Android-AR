@@ -147,7 +147,12 @@ Skip steps 1 and 2 if you have already downloaded / cloned the project and go to
 
 The project can be built in one of two ways: as an APK or through a direct install. Make sure you have a terminal opened in the root directory of the project.
 
-To build the APK: ```bazel build -c opt --config=android_arm64 mediapipe/projects/android/src/java/com/google/mediapipe/apps/faceeffect:faceeffect```
+**Build APK**:
 
-To do a direct install: ```bazel mobile-install --start_app --config=android_arm64 --android_cpu=arm64-v8a //mediapipe/projects/android/src/java/com/google/mediapipe/apps/faceeffect:faceeffect --verbose_failures```
+```bazel build -c opt --config=android_arm64 mediapipe/projects/android/src/java/com/google/mediapipe/apps/faceeffect:faceeffect```
+> Any APK that gets built will be stored in one of the bazel-* folders.
+
+**Direct Install**:
+
+```bazel mobile-install --start_app --config=android_arm64 --android_cpu=arm64-v8a //mediapipe/projects/android/src/java/com/google/mediapipe/apps/faceeffect:faceeffect --verbose_failures```
 > **NOTE:** remove the `--start_app` flag if you don't want the app to automatically launch once installed.
