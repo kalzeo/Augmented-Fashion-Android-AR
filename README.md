@@ -57,23 +57,19 @@ A script called ```install_android_studio.sh``` has been provided to speed up th
 
 1. [Download Android Studio Flamingo | 2022.2.1 for Linux](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2022.2.1.18/android-studio-2022.2.1.18-linux.tar.gz)
 
-2. Install git using:
-
-   ```sudo apt-get install git```
-
-3. Install JAVA JDK using:
+2. Install JAVA JDK using:
 
    ```sudo apt-get install openjdk-11-jdk```
 
-4. Install the required libraries for Android Studio with:
+3. Install the required libraries for Android Studio with:
 
    ```sudo apt-get install libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:i386```
 
-5. Unpack the Android Studio tar.gz file which should be in your download folder using:
+4. Unpack the Android Studio tar.gz file which should be in your download folder using:
 
    ```sudo tar -xf $HOME/Downloads/android-studio-2022.2.1.18-linux.tar.gz -C /opt/local/```
 
-6. Add an Android Studio Desktop entry to make launching it easier / searchable using:
+5. Add an Android Studio Desktop entry to make launching it easier / searchable using:
    ``````
    sudo bash -c 'cat <<EOF > /usr/share/applications/android-studio.desktop
    [Desktop Entry]
@@ -87,20 +83,20 @@ A script called ```install_android_studio.sh``` has been provided to speed up th
    EOF'
    ``````
 
-7. Press the Windows key and search for Android Studio and follow the setup wizard.
+6. Press the Windows key and search for Android Studio and follow the setup wizard.
 
-8. Once the setup wizard completes, you should be on the "Welcome to Android Studio" page. Press More Actions > SDK Manager.
+7. Once the setup wizard completes, you should be on the "Welcome to Android Studio" page. Press More Actions > SDK Manager.
 
-9. **IMPORTANT**: A SDK Manager settings window should be visible. Check the boxes 'Hide Obsolete Packages' and 'Show Package Details'.
+8. **IMPORTANT**: A SDK Manager settings window should be visible. Check the boxes 'Hide Obsolete Packages' and 'Show Package Details'.
 
-10. **IMPORTANT**: On the SDK Platforms tab, check the boxes for 'Android SDK Platform 33' and 'Sources for Android 33' under Android 13.0 (Tiramisu).
+9. **IMPORTANT**: On the SDK Platforms tab, check the boxes for 'Android SDK Platform 33' and 'Sources for Android 33' under Android 13.0 (Tiramisu).
 
-11. **IMPORTANT**: On the SDK Tools tab, check the box for '33.0.2' under Android SDK Build-Tools 34-rc3.
+10. **IMPORTANT**: On the SDK Tools tab, check the box for '33.0.2' under Android SDK Build-Tools 34-rc3.
 
-12. **IMPORTANT**: On the SDK Tools tab, check the box for '21.4.7075529' under NDK (Side by side).
+11. **IMPORTANT**: On the SDK Tools tab, check the box for '21.4.7075529' under NDK (Side by side).
 
-13. **IMPORTANT**: Setup the Android SDK and NDK environment variables using the following command in the terminal: ```sh setup_sdk_ndk_environment_variables.sh```
-14.  Close Android Studio
+12. **IMPORTANT**: Setup the Android SDK and NDK environment variables using the following command in the terminal: ```sh setup_sdk_ndk_environment_variables.sh```
+13.  Close Android Studio
 
 ## Necessary Installs Before Anything Else
 
