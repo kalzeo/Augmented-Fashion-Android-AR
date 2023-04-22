@@ -27,10 +27,6 @@ sudo apt-get update -qq
 echo "Installing Java JDK..."
 sudo apt-get install -qq openjdk-11-jdk
 
-# Install git
-echo "Installing git..."
-sudo apt-get -qq install git && echo "Git installed."
-
 # Install required libraries for Android Studio
 echo "Installing required libraries..."
 sudo apt-get install -qq libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:i386
