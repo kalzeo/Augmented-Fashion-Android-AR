@@ -65,7 +65,7 @@ The project can be built in one of two ways: as an APK or through a direct insta
 **Build APK**:
 
 ```sh make_apk.sh```
-> Any APK that gets built will be stored in one of the bazel-* folders.
+> Any APK that gets built will be stored in the bazel-out folder. Typically it will be in ```bazel-bin/mediapipe/projects/android/src/java/com/google/mediapipe/apps/faceeffect```.
 
 **Direct Install**:
 
@@ -163,7 +163,7 @@ The project can be built in one of two ways: as an APK or through a direct insta
 **Build APK**:
 
 ```bazel build -c opt --config=android_arm64 mediapipe/projects/android/src/java/com/google/mediapipe/apps/faceeffect:faceeffect```
-> Any APK that gets built will be stored in one of the bazel-* folders.
+> Any APK that gets built will be stored in the bazel-out folder. Typically it will be in ```bazel-bin/mediapipe/projects/android/src/java/com/google/mediapipe/apps/faceeffect```.
 
 **Direct Install**:
 
