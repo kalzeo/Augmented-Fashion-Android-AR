@@ -21,7 +21,7 @@ sed -i '/android_sdk_repository(/,/)/d' ../WORKSPACE
 sed -i '/android_ndk_repository(/,/)/d' ../WORKSPACE
 
 # Add an empty line before android_sdk_repository
-echo "\n" >> WORKSPACE
+echo "\n" >> ../WORKSPACE
 
 # Add the Android SDK repository to the Bazel WORKSPACE file
 echo "android_sdk_repository(

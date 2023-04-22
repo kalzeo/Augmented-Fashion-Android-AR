@@ -84,4 +84,4 @@ sudo -v && echo "Installing Android SDK Build-Tools 33.0.2..." && sudo $ANDROID_
 sudo -v && echo "Installing Android NDK 21.4.7075529..." && sudo $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;21.4.7075529"
 
 # Install Android SDK Platform-Tools 34.0.1
-sudo -v && echo "Installing Android SDK Platform-Tools 34.0.1..." && sudo $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools;34.0.1"
+sudo -v && echo "Installing latest Android SDK Platform-Tools..." && sudo $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools"
