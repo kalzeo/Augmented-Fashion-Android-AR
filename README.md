@@ -13,9 +13,13 @@ By following this guide, you will be able to clone the project from GitHub, set 
 
 The app requires the Google Mediapipe framework, which is not natively supported on Windows. Therefore, it is recommended to use **Linux**, specifically Ubuntu 22.04.2 LTS.
 
+## Download the Project
+Download the project as a .zip file from GitHub [here](https://github.com/kalzeo/Augmented-Fashion-Android-AR/archive/refs/heads/master.zip). It can be cloned using ```git clone https://github.com/kalzeo/Augmented-Fashion-Android-AR.git``` if you prefer that method.
+
+
 ## Necessary Installs Before Anything Else
 
-Before installing the app, please ensure that you have the following dependencies installed on your system. These installs must be done through terminal, and some require sudo privileges.
+Before installing the app, please ensure that you have the following dependencies installed on your system. These installs must be done through terminal, and some require sudo privileges. A script called 'install_dependencies.sh' can be found in the root folder of the project, open terminal and enter ```sh install_dependencies.sh```. If you have any issues using the script then the dependencies can be manually installed using the steps below.
 
 1. Update all outdated packages and dependencies on your system using:
 
@@ -49,10 +53,9 @@ You **MUST** also turn on developer settings on your Android device to enable US
 
 ```adb devices```
 
-
 ## Installing Bazel
 
-Again, these commands must be done through terminal and may require sudo privileges.
+A script called ```install_bazel.sh``` has been provided to speed up the process of installing Bazel. It can be run using the following command: ```sh install_bazel.sh```. Again, this must be done through terminal and will require sudo privileges. If the script fails to install Bazel, then the following steps can be done manually.
 
 1.  *Add the Bazel distribution URI as a package source using*
 ``````
@@ -71,7 +74,7 @@ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] h
 
 ## Installing and Setting Up Android Studio
 
-These commands must be executed through the terminal and may require sudo privileges.
+A script called ```install_android_studio.sh``` has been provided to speed up the process of installing Android Studio. It can be run using the following command: ```sh install_android_studio.sh```. Again, this must be done through terminal and may require sudo privileges. If the script fails at any point, then the following steps can be done manually.
 
 1. [Download Android Studio Flamingo | 2022.2.1 for Linux](https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2022.2.1.18/android-studio-2022.2.1.18-linux.tar.gz)
 
@@ -112,18 +115,19 @@ These commands must be executed through the terminal and may require sudo privil
 
 
 
-## Cloning the Project
-
+## Opening the Project
+Skip steps 1 and 2 if you have already downloaded / cloned the project and go to step 3 instead.
 1. Open Android Studio and click on "Get Project from Version Control" on the welcome screen.
 2. Enter the URL as https://github.com/kalzeo/Augmented-Fashion-Android-AR.git and click the Clone button.
-3. Once the project opens, go to `File > Project Structure > Project` and make sure the SDK is set to Android API 33.
-4. Go to `File > Project Structure > Modules` and make sure the Manifest file and Resources directory are correct.
+3. Open Android Studio and click on "Open" and find the project directory.
+4. Once the project opens, go to `File > Project Structure > Project` and make sure the SDK is set to Android API 33.
+5. Go to `File > Project Structure > Modules` and make sure the Manifest file and Resources directory are correct.
    > The manifest location should be something like:
    > /home/{YOUR USERNAME}/StudioProjects/Augmented-Fashion-Android-AR/mediapipe/projects/android/src/java/com/google/mediapipe/apps/camera/AndroidManifest.xml
    >
    > The resources location should be something like:
    > /home/{YOUR USERNAME}/StudioProjects/Augmented-Fashion-Android-AR/mediapipe/projects/android/src/java/com/google/mediapipe/apps/camera/res
-5. **IMPORTANT:** The `android_sdk_repository` and `android_ndk_repository` paths will need to be configured in the WORKSPACE file found in the root directory before any building can be done. Run the following script to set these up: `sh setup_workspace_sdk_ndk_paths.sh`
+6. The `android_sdk_repository` and `android_ndk_repository` paths will need to be configured in the WORKSPACE file found in the root directory. Run the following script to set these up: `sh setup_workspace_sdk_ndk_paths.sh`
 
 
 

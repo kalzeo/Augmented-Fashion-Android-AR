@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set the Android SDK and NDK paths
-ANDROID_SDK_PATH="$HOME/Android/Sdk"
-ANDROID_NDK_PATH="$HOME/Android/Sdk/ndk/21.4.7075529"
+ANDROID_SDK_PATH="/home/$(whoami)/Android/Sdk"
+ANDROID_NDK_PATH="/home/$(whoami)/Android/Sdk/ndk/21.4.7075529"
 
 # Set the environment variables
 export ANDROID_HOME="$ANDROID_SDK_PATH"
