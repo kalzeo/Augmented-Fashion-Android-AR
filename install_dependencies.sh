@@ -8,10 +8,6 @@ sudo -v
 echo "Updating packages and dependencies..."
 sudo apt-get -qq update && echo "Update complete."
 
-# Install git
-echo "Installing git..."
-sudo apt-get -qq install git && echo "Git installed."
-
 # Install OpenCV and FFmpeg dependencies
 echo "Installing OpenCV and FFmpeg dependencies..."
 sudo apt-get -qq install -y libopencv-core-dev \

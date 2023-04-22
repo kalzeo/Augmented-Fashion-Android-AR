@@ -27,6 +27,10 @@ sudo apt-get update -qq
 echo "Installing Java JDK..."
 sudo apt-get install -qq openjdk-11-jdk
 
+# Install git
+echo "Installing git..."
+sudo apt-get -qq install git && echo "Git installed."
+
 # Install required libraries for Android Studio
 echo "Installing required libraries..."
 sudo apt-get install -qq libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1 libbz2-1.0:i386
@@ -82,3 +86,6 @@ sudo -v && echo "Installing Android SDK Build-Tools 33.0.2..." && sudo $ANDROID_
 
 # Install Android NDK 21.4.7075529
 sudo -v && echo "Installing Android NDK 21.4.7075529..." && sudo $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;21.4.7075529"
+
+# Install Android SDK Platform-Tools 34.0.1
+sudo -v && echo "Installing Android SDK Platform-Tools 34.0.1..." && sudo $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools;34.0.1"
