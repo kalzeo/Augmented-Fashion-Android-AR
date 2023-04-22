@@ -13,24 +13,20 @@ By following this guide, you will be able to clone the project from GitHub, set 
 
 The app requires the Google Mediapipe framework, which is not natively supported on Windows. Therefore, it is recommended to use **Linux**, specifically Ubuntu 22.04.2 LTS.
 
-## Install Github CLI for Ubuntu
-A script called ```install_github.sh``` has been provided to speed up the process of installing Git / GitHub. It can be run using the following command: ```sh install_git.sh```. This must be done through terminal inside the helpers directory of the project folder and may require sudo privileges. If the script fails at any point, then the following steps can be done manually.
-
-**ONLY DO THESE STEPS IF THE INSTALL SCRIPT DOES NOT WORK**
-
+## Install Github CLI for Ubuntu and Clone Project
 1. Install Git
 
-```sudo apt-get install git```
+```sudo apt-get install git -qq```
 
 2. Install Github CLI through terminal using:
 
 ``````
-type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
+type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y -qq)
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
 && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
 && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-&& sudo apt update \
-&& sudo apt install gh -y
+&& sudo apt update -qq \
+&& sudo apt install gh -y -qq
 ``````
 
 3. Login to Github and following through the steps:
@@ -43,7 +39,7 @@ curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo 
 
 4. Clone the repo to your desktop:
 
-```gh repo clone kalzeo/Augmented-Fashion-Android-AR ~/Desktop/Augmented-Fashion-Android-AR-master```
+```gh repo clone kalzeo/Augmented-Fashion-Android-AR ~/Desktop/Augmented-Fashion-Android-AR-master -q```
 
 5. Navigate to the project folder using:
 
