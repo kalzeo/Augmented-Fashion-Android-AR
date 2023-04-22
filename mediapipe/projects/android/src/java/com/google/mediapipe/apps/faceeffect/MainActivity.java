@@ -203,7 +203,8 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
                             // DONE: Hide UI when screen is tapped
                             @Override
                             public boolean onSingleTapUp(MotionEvent event) {
-                                HideAllUIComponents();
+                                //HideAllUIComponents();
+                                ToggleVisibility(screenshotButton);
                                 return true;
                             }
                         });
