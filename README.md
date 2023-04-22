@@ -149,8 +149,6 @@ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] h
 
 
 ## Opening the Project
-Skip steps 1 and 2 if you have already downloaded / cloned the project and go to step 3 instead.
-
 **DO STEPS 1 AND 2 IF THE PROJECT HAS NOT BEEN DOWNLOADED / CLONED OTHERWISE GO TO STEP 3**.
 
 1. Open Android Studio and click on "Get Project from Version Control" on the welcome screen.
