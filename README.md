@@ -13,6 +13,42 @@ By following this guide, you will be able to clone the project from GitHub, set 
 
 The app requires the Google Mediapipe framework, which is not natively supported on Windows. Therefore, it is recommended to use **Linux**, specifically Ubuntu 22.04.2 LTS.
 
+## Install Github CLI for Ubuntu
+A script called ```install_github.sh``` has been provided to speed up the process of installing Git / GitHub. It can be run using the following command: ```sh install_git.sh```. This must be done through terminal and may require sudo privileges. If the script fails at any point, then the following steps can be done manually.
+
+**ONLY DO THESE STEPS IF THE INSTALL SCRIPT DOES NOT WORK**
+
+1. Install Git
+
+```sudo apt-get install git```
+
+2. Install Github CLI through terminal using:
+
+``````
+type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+&& sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+&& sudo apt update \
+&& sudo apt install gh -y
+``````
+
+3. Login to Github and following through the steps:
+
+```gh auth login```
+> What account do you want to log into? GitHub.com
+> What is your preferred protocol for Git operations? HTTPS
+> How would you like to authenticate GitHub CLI? Login with a web browser
+> Copy the code, press enter to launch GitHub and use the code to authorise
+
+4. Clone the repo to your desktop:
+
+```gh repo clone kalzeo/Augmented-Fashion-Android-AR ~/Desktop/Augmented-Fashion-Android-AR-master```
+
+5. Navigate to the project folder using:
+
+```cd ~/Desktop/Augmented-Fashion-Android-AR-master```
+
 ## Installing and Setting Up Android Studio
 
 A script called ```install_android_studio.sh``` has been provided to speed up the process of installing Android Studio. It can be run using the following command: ```sh install_android_studio.sh```. Again, this must be done through terminal and may require sudo privileges. If the script fails at any point, then the following steps can be done manually.
