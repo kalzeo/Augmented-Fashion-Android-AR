@@ -200,11 +200,11 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
                                 HideAllUIComponents();
                             }
 
-                            // DONE: Hide UI when screen is tapped
+                            // DONE: Hide UI when screen is tapped, ideally it should only hide the screenshot button since the Horizontal Scrollview with the preview effects should only appear when a long press is done,
                             @Override
                             public boolean onSingleTapUp(MotionEvent event) {
-                                //HideAllUIComponents();
-                                ToggleVisibility(screenshotButton);
+                                HideAllUIComponents();
+                                //ToggleVisibility(screenshotButton);
                                 return true;
                             }
                         });
