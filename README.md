@@ -1,6 +1,6 @@
-# Face Effect AR App
+# Augmented Fashion Android AR App
 
-This document provides step-by-step instructions on how to set up and build the Augmented Fashion Android AR project. This project is a mobile application designed for Android that uses machine learning to visualize effects on a user's face. It relies on the MediaPipe framework, an open-source library that provides tools for building perception pipelines.
+This document provides step-by-step instructions on how to set up and build the Augmented Fashion Android AR project. This project is a mobile application designed for Android that uses machine learning to visualize effects on a user's face, may extend the functionality to other use cases in the future. It relies on the MediaPipe framework, an open-source library that provides tools for building perception pipelines.
 
 This guide is intended for developers who want to build and customize the application. It assumes that you have basic knowledge of Android app development, MediaPipe, and the Bazel build system.
 
@@ -14,7 +14,7 @@ By following this guide, you will be able to clone the project from GitHub, set 
 The app requires the Google Mediapipe framework, which is not natively supported on Windows. Therefore, it is recommended to use **Linux**, specifically Ubuntu 22.04.2 LTS.
 
 ## Install Github CLI for Ubuntu
-A script called ```install_github.sh``` has been provided to speed up the process of installing Git / GitHub. It can be run using the following command: ```sh install_git.sh```. This must be done through terminal and may require sudo privileges. If the script fails at any point, then the following steps can be done manually.
+A script called ```install_github.sh``` has been provided to speed up the process of installing Git / GitHub. It can be run using the following command: ```sh install_git.sh```. This must be done through terminal inside the helpers directory of the project folder and may require sudo privileges. If the script fails at any point, then the following steps can be done manually.
 
 **ONLY DO THESE STEPS IF THE INSTALL SCRIPT DOES NOT WORK**
 
@@ -51,7 +51,7 @@ curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo 
 
 ## Installing and Setting Up Android Studio
 
-A script called ```install_android_studio.sh``` has been provided to speed up the process of installing Android Studio. It can be run using the following command: ```sh install_android_studio.sh```. Again, this must be done through terminal and may require sudo privileges. If the script fails at any point, then the following steps can be done manually.
+A script called ```install_android_studio.sh``` has been provided in the helpers folder to speed up the process of installing Android Studio. It can be run using the following command: ```sh install_android_studio.sh```. Again, this must be done through terminal inside the helpers directory of the project folder and may require sudo privileges. If the script fails at any point, then the following steps can be done manually.
 
 **ONLY DO THESE STEPS IF THE INSTALL SCRIPT DOES NOT WORK**
 
@@ -100,7 +100,7 @@ A script called ```install_android_studio.sh``` has been provided to speed up th
 
 ## Necessary Installs Before Anything Else
 
-Before installing the app, please ensure that you have the following dependencies installed on your system. These installs must be done through terminal, and some require sudo privileges. A script called 'install_dependencies.sh' can be found in the root folder of the project, open terminal and enter ```sh install_dependencies.sh```. If you have any issues using the script then the dependencies can be manually installed using the steps below.
+Please ensure that you have the following dependencies installed on your system. These installs must be done through terminal, and some require sudo privileges. A script called 'install_dependencies.sh' can be found in the helpers folder in root directory of the project, open terminal and enter ```sh install_dependencies.sh```. If you have any issues using the script then the dependencies can be manually installed using the steps below.
 
 **ONLY DO THESE STEPS IF THE INSTALL SCRIPT DOES NOT WORK**
 
@@ -134,7 +134,7 @@ You **MUST** also turn on developer settings on your Android device to enable US
 
 ## Installing Bazel
 
-A script called ```install_bazel.sh``` has been provided to speed up the process of installing Bazel. It can be run using the following command: ```sh install_bazel.sh```. Again, this must be done through terminal and will require sudo privileges. If the script fails to install Bazel, then the following steps can be done manually.
+A script called ```install_bazel.sh``` has been provided in the helpers folder to speed up the process of installing Bazel. It can be run using the following command: ```sh install_bazel.sh```. Again, this must be done through terminal inside the helpers directory and will require sudo privileges. If the script fails to install Bazel, then the following steps can be done manually.
 
 **ONLY DO THESE STEPS IF THE INSTALL SCRIPT DOES NOT WORK**
 

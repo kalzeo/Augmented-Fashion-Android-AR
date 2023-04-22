@@ -14,7 +14,7 @@ curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo 
 echo "GitHub CLI installed successfully!"
 
 echo "Logging in to GitHub..."
-gh auth login -qs "What account do you want to log into?" -qs "GitHub.com" -qs "What is your preferred protocol for Git operations?" -qs "HTTPS" -qs "How would you like to authenticate GitHub CLI?" -qs "Login with a web browser"
+gh auth login
 echo "Logged in successfully!"
 
 echo "Cloning the repository to your desktop..."
@@ -24,3 +24,4 @@ echo "Repository cloned successfully!"
 echo "Navigating to project folder..."
 cd ~/Desktop/Augmented-Fashion-Android-AR-master
 echo "Done! You are now in the project folder."
+
