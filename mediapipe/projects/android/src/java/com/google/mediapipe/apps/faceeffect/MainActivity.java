@@ -203,8 +203,7 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
                             // DONE: Hide UI when screen is tapped, ideally it should only hide the screenshot button since the Horizontal Scrollview with the preview effects should only appear when a long press is done,
                             @Override
                             public boolean onSingleTapUp(MotionEvent event) {
-                                HideAllUIComponents();
-                                //ToggleVisibility(screenshotButton);
+                                HideScreenShotComponent();
                                 return true;
                             }
                         });
@@ -254,14 +253,15 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
      * is shown as black.
      */
     private void TakeScreenshot() {
+        //NOTE : Since SDK 30, WRITE_EXTERNAL_STORAGE is deprecated. Also, the permission is already managed with onRequestPermissionsResult()
         // Check for permission to write to external storage
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_CODE_PERMISSION_WRITE_EXTERNAL_STORAGE);
-            return;
-        }
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+//                    REQUEST_CODE_PERMISSION_WRITE_EXTERNAL_STORAGE);
+//            return;
+//        }
 
         // Create a filename for the screenshot
         Date now = new Date();
@@ -339,13 +339,38 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         v.setVisibility(v.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
     }
 
+    private void MultipleToggleComponent(View v1, View v2){
+        switch (v1.getVisibility()){
+            case View.VISIBLE:
+                if(v2.getVisibility()==View.VISIBLE){
+                    v1.setVisibility(View.GONE);
+                    v2.setVisibility(View.GONE);
+                }else{
+                    v2.setVisibility(View.VISIBLE);
+                }
+                break;
+            case View.GONE:
+                if(v2.getVisibility()==View.VISIBLE){
+                    v1.setVisibility(View.VISIBLE);
+                }else{
+                    v1.setVisibility(View.VISIBLE);
+                    v2.setVisibility(View.VISIBLE);
+                }
+                break;
+        }
+    }
 
     /**
      * Hide all the components in one go, useful for when it comes to capturing
      * the screenshot so that only the camera view and face effect will be shown.
      */
     private void HideAllUIComponents() {
-        ToggleVisibility(previewMaterialLayout);
+        MultipleToggleComponent(screenshotButton, previewMaterialLayout);
+//        ToggleVisibility(previewMaterialLayout);
+//        ToggleVisibility(screenshotButton);
+    }
+
+    private void HideScreenShotComponent(){
         ToggleVisibility(screenshotButton);
     }
 
