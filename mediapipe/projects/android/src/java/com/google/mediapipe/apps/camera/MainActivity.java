@@ -24,6 +24,7 @@ import android.util.Log;
 import android.util.Size;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import com.google.mediapipe.components.CameraHelper;
@@ -33,6 +34,7 @@ import com.google.mediapipe.components.FrameProcessor;
 import com.google.mediapipe.components.PermissionHelper;
 import com.google.mediapipe.framework.AndroidAssetUtil;
 import com.google.mediapipe.glutil.EglManager;
+
 
 /** Main activity of MediaPipe basic app. */
 public class MainActivity extends AppCompatActivity {
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
   // {@link SurfaceTexture} where the camera-preview frames can be accessed.
   private SurfaceTexture previewFrameTexture;
   // {@link SurfaceView} that displays the camera-preview frames processed by a MediaPipe graph.
-  private SurfaceView previewDisplayView;
+  protected SurfaceView previewDisplayView;
 
   // Creates and manages an {@link EGLContext}.
   private EglManager eglManager;
@@ -89,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(getContentViewLayoutResId());
-
     try {
       applicationInfo =
           getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
@@ -144,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
   protected void onPause() {
     super.onPause();
     converter.close();
-
     // Hide preview display until we re-open the camera again.
     previewDisplayView.setVisibility(View.GONE);
   }
@@ -180,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
             : CameraHelper.CameraFacing.BACK;
     cameraHelper.startCamera(
         this, cameraFacing, previewFrameTexture, cameraTargetResolution());
+
   }
 
   protected Size computeViewSize(int width, int height) {
@@ -226,4 +227,31 @@ public class MainActivity extends AppCompatActivity {
               }
             });
   }
+
+//  protected Bitmap takeScreenshotBitmap(){
+//    Bitmap mBitmap = null; //peut être à mettre en commentaire
+////    if (mMediaProjection == null)
+////      return mBitmap;
+//
+//    Image image = mImageReader.acquireLatestImage();
+//    if (image == null)
+//      return mBitmap;
+//
+//    int width = image.getWidth();
+//    int height = image.getHeight();
+//    final Image.Plane[] planes = image.getPlanes();
+//    final ByteBuffer buffer = planes[0].getBuffer();
+//    int pixelStride = planes[0].getPixelStride();
+//    int rowStride = planes[0].getRowStride();
+//    int rowPadding = rowStride - pixelStride * width;
+//    mBitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
+//    mBitmap.copyPixelsFromBuffer(buffer);
+//    mBitmap = Bitmap.createBitmap(mBitmap, 0, 0, width, height);
+//    mImageReader.close();
+//    image.close();
+//
+//    return mBitmap;
+//  }
+
+
 }

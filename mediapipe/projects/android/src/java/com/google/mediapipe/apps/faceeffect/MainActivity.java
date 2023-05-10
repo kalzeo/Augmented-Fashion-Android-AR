@@ -14,7 +14,9 @@
 
 package com.google.mediapipe.apps.faceeffect;
 
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Color;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -22,6 +24,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.MeasureSpec;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -52,15 +55,22 @@ import android.webkit.MimeTypeMap;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Date;
+import android.content.Context;
 import androidx.core.content.ContextCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.annotation.NonNull;
 import android.Manifest;
+import android.view.PixelCopy;
+import android.graphics.Rect;
+import android.os.Looper;
+import android.os.Handler;
+import java.util.function.Consumer;
 
 
 /**
@@ -68,7 +78,7 @@ import android.Manifest;
  */
 public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity {
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
-    private static String[] permissionstorage = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+    private static String[] permissionstorage = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_MEDIA_IMAGES};
     private static final int REQUEST_CODE_PERMISSION_WRITE_EXTERNAL_STORAGE = 123;
 
 
@@ -90,21 +100,21 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
 
     private Button screenshotButton;
     private LinearLayout previewMaterialLayout;
-
+    private ViewGroup viewGroup;
     private GestureDetector tapGestureDetector;
+
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         // Circle for testing
         Drawable shapeDrawable = getResources().getDrawable(R.drawable.white_circle);
         Drawable cancelCircleDrawable = getResources().getDrawable(R.drawable.cancel_circle);
 
         // In order: Camera, Screenshot Button, Thumbnail Previews, Horizontal Scrollview container
-        ViewGroup viewGroup = findViewById(R.id.preview_display_layout);
+        viewGroup = findViewById(R.id.preview_display_layout);
         screenshotButton = findViewById(R.id.screenshot_button);
         previewMaterialLayout = findViewById(R.id.preview_materials_layout);
         HorizontalScrollView horizontalScrollView = findViewById(R.id.horizontal_scrollview);
@@ -240,10 +250,9 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
 
         screenshotButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                TakeScreenshot();
-            }
+            public void onClick(View v) {TakeScreenshot();}
         });
+//        setContentView(R.layout.activity_main);
     }
 
 
@@ -269,42 +278,67 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         String filename = "AugmentedFashionFace_" + dateFormat.format(now) + ".jpg";
 
         // Capture the bitmap of the camera view
-        Bitmap cameraBitmap = GetCameraViewBitmap();
-
-        // Capture the bitmap of the rootView
         HideAllUIComponents();
-        View rootView = getWindow().getDecorView().getRootView();
-        rootView.setDrawingCacheEnabled(true);
-        Bitmap rootViewBitmap = Bitmap.createBitmap(rootView.getDrawingCache());
-        rootView.setDrawingCacheEnabled(false);
+
+        View cameraView = findViewById(R.id.preview_display_layout);
+        Bitmap cameraBitmap = GetCameraViewBitmap(viewGroup);
+        //Rect object based on screen's caracteristic
+        Rect rect = new Rect(viewGroup.getLeft(), viewGroup.getTop(), viewGroup.getRight(), viewGroup.getBottom());
+        //regarder la doc de cosumer pour faire commentaire
+        Consumer<Bitmap> check= new Consumer<Bitmap>() {
+            @Override
+            public void accept(Bitmap bitmap) {
+                saveImage(bitmap, filename);
+            }
+        };
+        checkScreenshot(cameraBitmap, this, rect, check);
+        HideAllUIComponents();
+
+        /////OLD VERSION
+        // Capture the bitmap of the rootView
+//        HideAllUIComponents();
+//        View rootView = getWindow().getDecorView().getRootView();
+//        rootView.setDrawingCacheEnabled(true);
+//        Bitmap rootViewBitmap = Bitmap.createBitmap(rootView.getDrawingCache());
+//        rootView.setDrawingCacheEnabled(false);
+
 
         // Combine the two bitmaps into a single bitmap
-        Bitmap combinedBitmap = Bitmap.createBitmap(rootViewBitmap.getWidth(), rootViewBitmap.getHeight() + cameraBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(rootViewBitmap);
-        canvas.drawBitmap(rootViewBitmap, 0f, 0f, null);
-        canvas.drawBitmap(cameraBitmap, 0f, rootViewBitmap.getHeight(), null);
+//        Bitmap combinedBitmap = Bitmap.createBitmap(rootViewBitmap.getWidth(), rootViewBitmap.getHeight() + cameraBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+//        Bitmap combinedBitmap = Bitmap.createBitmap(rootViewBitmap.getWidth(), rootViewBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+//        Canvas canvas = new Canvas(combinedBitmap);
+//        Canvas canvas = new Canvas(cameraBitmap);
+//        cameraView.layout(cameraView.getLeft(), cameraView.getTop(), cameraView.getRight(), cameraView.getBottom());
+//        cameraView.draw(canvas);
+//        canvas.drawBitmap(cameraBitmap, 0f, 0f, null);
 
-        HideAllUIComponents();
 
         // Save the screenshot to the Pictures directory
-        ContentResolver resolver = getContentResolver();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
-        contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
-        Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+//        ContentResolver resolver = getContentResolver();
+//        ContentValues contentValues = new ContentValues();
+//        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
+//        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
+//        contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+//        Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+//
+////        String path = getRealPathFromURI(imageUri);
+////        Bitmap usableBitmap = decodeBitmap(path);
+//
+//        try {
+////            OutputStream imageOutputStream = resolver.openOutputStream(imageUri);
+//            OutputStream imageOutputStream = resolver.openOutputStream(imageUri);
+////            usableBitmap.compress(Bitmap.CompressFormat.JPEG, 100, imageOutputStream);
+////            rootViewBitmap.compress(Bitmap.CompressFormat.JPEG, 100, imageOutputStream);
+//            combinedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, imageOutputStream);
+//
+//            imageOutputStream.close();
+//            Toast.makeText(this, "Screenshot saved", Toast.LENGTH_SHORT).show();
+//            OpenScreenshot(imageUri);
+//        } catch (IOException e) {
+//            Toast.makeText(this, "Failed to save screenshot", Toast.LENGTH_SHORT).show();
+//            //e.printStackTrace();
+//        }
 
-        try {
-            OutputStream imageOutputStream = resolver.openOutputStream(imageUri);
-            combinedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, imageOutputStream);
-
-            imageOutputStream.close();
-            Toast.makeText(this, "Screenshot saved", Toast.LENGTH_SHORT).show();
-            OpenScreenshot(imageUri);
-        } catch (IOException e) {
-            Toast.makeText(this, "Failed to save screenshot", Toast.LENGTH_SHORT).show();
-            //e.printStackTrace();
-        }
     }
 
     /**
@@ -317,17 +351,91 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         startActivity(intent);
     }
 
+    ////////////////////
+
+    /**
+     *
+     * @param bitmap
+     * @param activity
+     * @param viewRect
+     * @param onSuccess
+     */
+    private void checkScreenshot(Bitmap bitmap, Activity activity, Rect viewRect, Consumer<Bitmap> onSuccess) {
+//        Bitmap bitmap = Bitmap.createBitmap(viewRect.width(), viewRect.height(), Bitmap.Config.ARGB_8888);
+        //regarder doc pixelcopy pour faire commentaire
+        PixelCopy.request(previewDisplayView, viewRect, bitmap,
+                (copyResult) -> {
+                    if (copyResult == PixelCopy.SUCCESS) {
+                        onSuccess.accept(bitmap);
+                    } else {
+                        throw new RuntimeException("problem with taking a screenshot");
+                    }
+                    bitmap.recycle();
+                },
+                new Handler(Looper.getMainLooper())
+        );
+    }
+
+    /**
+     * Save an image to a phone's gallery
+     * @param bitmap - The bitmap that it has to be convert as an Image file to be saved into the gallery .
+     * @param Filename - The string that contains the name of the file.
+     */
+    protected void saveImage(Bitmap bitmap, String Filename) {
+        if (android.os.Build.VERSION.SDK_INT >= 29) {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
+            values.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
+            values.put(MediaStore.MediaColumns.DISPLAY_NAME, Filename);
+            values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+            values.put(MediaStore.Images.Media.IS_PENDING, true);
+
+            Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            if (uri != null) {
+                try {
+                    saveImageToStream(bitmap, getContentResolver().openOutputStream(uri));
+                    values.put(MediaStore.Images.Media.IS_PENDING, false);
+                    this.getContentResolver().update(uri, values, null, null);
+                    Toast.makeText(this, "Screenshot saved", Toast.LENGTH_SHORT).show();
+                    OpenScreenshot(uri);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+    }
+
+    /**
+     * Save an image using a given outputstream and a given bitmap
+     */
+    private void saveImageToStream(Bitmap bitmap, OutputStream outputStream) {
+        if (outputStream != null) {
+            try {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                outputStream.flush();
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //////////////////
+
     /**
      * TODO
      * Fetch the current View of the camera so that it can be included in the screenshot.
-     * @return A bitmap of the camera preview
+     * Obtain a bitmap from the given view
+     * @return A bitmap of the view
      */
-    private Bitmap GetCameraViewBitmap() {
+    private Bitmap GetCameraViewBitmap(View v) {
         // Find the camera view by its ID
-        View cameraView = findViewById(R.id.preview_display_layout);
-        Bitmap bitmap = Bitmap.createBitmap(cameraView.getWidth(), cameraView.getHeight(), Bitmap.Config.ARGB_8888);
+//        View cameraView = findViewById(R.id.preview_display_layout);
+        Bitmap bitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        cameraView.draw(canvas);
+        v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+        v.draw(canvas);
         return bitmap;
     }
 
@@ -339,7 +447,12 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         v.setVisibility(v.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
     }
 
-    private void MultipleToggleComponent(View v1, View v2){
+    /**
+     * Toggle the visibility of two Views to show or hide them
+     * We did this on only two views to represent Screenshot button and filter's Scrollbar
+     * @param v1 - The View to be hidden or shown.
+     */
+    private void MultipleToggleVisibility(View v1, View v2){
         switch (v1.getVisibility()){
             case View.VISIBLE:
                 if(v2.getVisibility()==View.VISIBLE){
@@ -365,7 +478,7 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
      * the screenshot so that only the camera view and face effect will be shown.
      */
     private void HideAllUIComponents() {
-        MultipleToggleComponent(screenshotButton, previewMaterialLayout);
+        MultipleToggleVisibility(screenshotButton, previewMaterialLayout);
 //        ToggleVisibility(previewMaterialLayout);
 //        ToggleVisibility(screenshotButton);
     }
