@@ -80,6 +80,7 @@ android_binary(
         "//mediapipe/framework/formats:matrix_data_java_proto_lite",
         "//mediapipe/java/com/google/mediapipe/framework:android_framework",
         "//mediapipe/modules/face_geometry/protos:face_geometry_java_proto_lite",
+        "//mediapipe/framework/formats:landmark_java_proto_lite",
         "@maven//:androidx_annotation_annotation",
         "@maven//:androidx_appcompat_appcompat",
         "@maven//:androidx_core_core",

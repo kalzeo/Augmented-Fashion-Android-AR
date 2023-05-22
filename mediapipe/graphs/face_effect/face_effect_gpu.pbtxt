@@ -29,6 +29,11 @@ output_stream: "output_video"
 # (std::vector<face_geometry::FaceGeometry>)
 output_stream: "multi_face_geometry"
 
+#UPDATE
+# Collection of detected/processed faces, each represented as a list of
+# landmarks. (std::vector<NormalizedLandmarkList>)
+output_stream: "multi_face_landmarks"
+
 # Throttles the images flowing downstream for flow control. It passes through
 # the very first incoming image unaltered, and waits for downstream nodes
 # (calculators and subgraphs) in the graph to finish their tasks before it
@@ -50,6 +55,20 @@ node {
   output_stream: "throttled_input_video"
 }
 
+#UPDATE
+# Defines side packets for further use in the graph.
+node {
+  calculator: "ConstantSidePacketCalculator"
+  output_side_packet: "PACKET:0:num_faces"
+  output_side_packet: "PACKET:1:with_attention"
+  node_options: {
+    [type.googleapis.com/mediapipe.ConstantSidePacketCalculatorOptions]: {
+      packet { int_value: 1 }
+      packet { bool_value: true }
+    }
+  }
+}
+
 # Generates an environment that describes the current virtual scene.
 node {
   calculator: "FaceGeometryEnvGeneratorCalculator"
@@ -64,6 +83,30 @@ node {
           far: 10000.0  # 100m
         }
       }
+    }
+  }
+}
+
+#UPDATE
+# Subgraph that detects faces and corresponding landmarks.
+node {
+  calculator: "FaceLandmarkFrontGpu"
+  input_stream: "IMAGE:throttled_input_video"
+  input_side_packet: "NUM_FACES:num_faces"
+  output_stream: "LANDMARKS:multi_face_landmarks"
+}
+
+#UPDATE
+# Extracts a single set of face landmarks associated with the most prominent
+# face detected from a collection.
+node {
+  calculator: "SplitNormalizedLandmarkListVectorCalculator"
+  input_stream: "multi_face_landmarks"
+  output_stream: "face_landmarks"
+  node_options: {
+    [type.googleapis.com/mediapipe.SplitVectorCalculatorOptions] {
+      ranges: { begin: 0 end: 1 }
+      element_only: true
     }
   }
 }

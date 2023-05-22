@@ -71,6 +71,15 @@ import android.graphics.Rect;
 import android.os.Looper;
 import android.os.Handler;
 import java.util.function.Consumer;
+//landmarks
+import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmark;
+import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmarkList;
+import com.google.mediapipe.framework.AndroidPacketCreator;
+import java.text.DecimalFormat;
+import java.math.RoundingMode;
+//timer
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /**
@@ -90,7 +99,14 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
     private static final String SELECTED_EFFECT_ID_INPUT_STREAM_NAME = "selected_effect_id";
     private static final String OUTPUT_FACE_GEOMETRY_STREAM_NAME = "multi_face_geometry";
 
+    ////FACE LANDMARK
+    private static final String INPUT_NUM_FACES_SIDE_PACKET_NAME = "num_faces";
+    private static final String OUTPUT_LANDMARKS_STREAM_NAME = "multi_face_landmarks";
+    // Max number of faces to detect/process.
+    private static final int NUM_FACES = 1;
+
     private static final boolean USE_FACE_DETECTION_INPUT_SOURCE = false;
+    private static final boolean USE_FACE_LANDMARK_INPUT_SOURCE = true;
     private static final int MATRIX_TRANSLATION_Z_INDEX = 14;
 
     private final Object effectSelectionLock = new Object();
@@ -100,10 +116,16 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
 
     private Button screenshotButton;
     private LinearLayout previewMaterialLayout;
-    private ViewGroup viewGroup;
     private GestureDetector tapGestureDetector;
 
+    //face landmarks
+    // class member variable to save the X,Y coordinates
+    private float[] lastTouchDownXY = new float[2];
+    private float boxlimitTop,boxlimitRight,boxlimitLeft,boxlimitBottom;
+    private DecimalFormat df = new DecimalFormat("#.#");
 
+    //timer
+    Timer timer = new Timer();
 
 
     @Override
@@ -114,7 +136,10 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         Drawable cancelCircleDrawable = getResources().getDrawable(R.drawable.cancel_circle);
 
         // In order: Camera, Screenshot Button, Thumbnail Previews, Horizontal Scrollview container
-        viewGroup = findViewById(R.id.preview_display_layout);
+        View viewGroup = findViewById(R.id.preview_display_layout);
+        //manage x,y coordinates about where does the user click
+        viewGroup.setOnTouchListener(touchListener);
+//        viewGroup.setOnClickListener(clickListener);
         screenshotButton = findViewById(R.id.screenshot_button);
         previewMaterialLayout = findViewById(R.id.preview_materials_layout);
         HorizontalScrollView horizontalScrollView = findViewById(R.id.horizontal_scrollview);
@@ -140,37 +165,62 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
                 processor.getPacketCreator().createBool(USE_FACE_DETECTION_INPUT_SOURCE));
         processor.setInputSidePackets(inputSidePackets);
 
-        // This callback demonstrates how the output face geometry packet can be obtained and used
-        // in an Android app. As an example, the Z-translation component of the face pose transform
-        // matrix is logged for each face being equal to the approximate distance away from the camera
-        // in centimeters.
-        processor.addPacketCallback(
-                OUTPUT_FACE_GEOMETRY_STREAM_NAME,
-                (packet) -> {
-                    Log.d(TAG, "Received a multi face geometry packet.");
-                    List<FaceGeometry> multiFaceGeometry =
-                            PacketGetter.getProtoVector(packet, FaceGeometry.parser());
+//         This callback demonstrates how the output face geometry packet can be obtained and used
+//         in an Android app. As an example, the Z-translation component of the face pose transform
+//         matrix is logged for each face being equal to the approximate distance away from the camera
+//         in centimeters.
+//        processor.addPacketCallback(
+//                OUTPUT_FACE_GEOMETRY_STREAM_NAME,
+//                (packet) -> {
+//                    Log.d(TAG, "Received a multi face geometry packet.");
+//                    List<FaceGeometry> multiFaceGeometry =
+//                            PacketGetter.getProtoVector(packet, FaceGeometry.parser());
+//
+//                    StringBuilder approxDistanceAwayFromCameraLogMessage = new StringBuilder();
+//                    for (FaceGeometry faceGeometry : multiFaceGeometry) {
+//                        if (approxDistanceAwayFromCameraLogMessage.length() > 0) {
+//                            approxDistanceAwayFromCameraLogMessage.append(' ');
+//                        }
+//                        MatrixData poseTransformMatrix = faceGeometry.getPoseTransformMatrix();
+//                        approxDistanceAwayFromCameraLogMessage.append(
+//                                -poseTransformMatrix.getPackedData(MATRIX_TRANSLATION_Z_INDEX));
+//                    }
+//
+//                    Log.d(
+//                            TAG,
+//                            "[TS:"
+//                                    + packet.getTimestamp()
+//                                    + "] size = "
+//                                    + multiFaceGeometry.size()
+//                                    + "; approx. distance away from camera in cm for faces = ["
+//                                    + approxDistanceAwayFromCameraLogMessage
+//                                    + "]");
+//                });
 
-                    StringBuilder approxDistanceAwayFromCameraLogMessage = new StringBuilder();
-                    for (FaceGeometry faceGeometry : multiFaceGeometry) {
-                        if (approxDistanceAwayFromCameraLogMessage.length() > 0) {
-                            approxDistanceAwayFromCameraLogMessage.append(' ');
-                        }
-                        MatrixData poseTransformMatrix = faceGeometry.getPoseTransformMatrix();
-                        approxDistanceAwayFromCameraLogMessage.append(
-                                -poseTransformMatrix.getPackedData(MATRIX_TRANSLATION_Z_INDEX));
-                    }
+        ///////TEST///////////
 
-                    Log.d(
-                            TAG,
-                            "[TS:"
-                                    + packet.getTimestamp()
-                                    + "] size = "
-                                    + multiFaceGeometry.size()
-                                    + "; approx. distance away from camera in cm for faces = ["
-                                    + approxDistanceAwayFromCameraLogMessage
-                                    + "]");
-                });
+        //try to initialize face landmark
+//        AndroidPacketCreator packetCreator = processor.getPacketCreator();
+//        Map<String, Packet> faceinputSidePackets = new HashMap<>();
+//        faceinputSidePackets.put(INPUT_NUM_FACES_SIDE_PACKET_NAME, packetCreator.createInt32(NUM_FACES));
+//        processor.setInputSidePackets(faceinputSidePackets);
+
+//         To show verbose logging, run:
+//         adb shell setprop log.tag.MainActivity VERBOSE
+//        processor.addPacketCallback(
+//                OUTPUT_LANDMARKS_STREAM_NAME,
+//                (packet) -> {
+////                  Log.v(TAG, "Received multi face landmarks packet.");
+//                    List<NormalizedLandmarkList> multiFaceLandmarks =
+//                            PacketGetter.getProtoVector(packet, NormalizedLandmarkList.parser());
+//                    //initialize coordinates of the limit of the "bounding box"
+//                    boxlimitTop = multiFaceLandmarks.get(0).getLandmarkList().get(10).getY()*1920f;
+//                    boxlimitLeft = multiFaceLandmarks.get(0).getLandmarkList().get(234).getX()*1080f;
+//                    boxlimitRight = multiFaceLandmarks.get(0).getLandmarkList().get(152).getX()*1080f;
+//                    boxlimitBottom = multiFaceLandmarks.get(0).getLandmarkList().get(454).getY()*1920f;
+//                    });
+
+        /////////////////////
 
         // Alongside the input camera frame, we also send the `selected_effect_id` int32 packet to
         // indicate which effect should be rendered on this frame.
@@ -196,6 +246,22 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
                     }
                 });
 
+        //This callback demonstrates how the output normalized landmark packet can be obtained and used in an Android app.
+        //initialize coordinates of used landmarks to create kind of bounding box
+        processor.addPacketCallback(
+                OUTPUT_LANDMARKS_STREAM_NAME,
+                (packet) -> {
+//                  Log.v(TAG, "Received multi face landmarks packet.");
+                    List<NormalizedLandmarkList> multiFaceLandmarks =
+                            PacketGetter.getProtoVector(packet, NormalizedLandmarkList.parser());
+                    //initialize coordinates of the limit of the "bounding box"
+                    boxlimitTop = multiFaceLandmarks.get(0).getLandmarkList().get(10).getY()*1920f; //multiply by 1920 allow to obtain an usable value as cooridnate to mark the top limit of the bounding box
+                    boxlimitLeft = multiFaceLandmarks.get(0).getLandmarkList().get(234).getX()*1080f;//multiply by 1080 allow to obtain an usable value as cooridnate to mark the left limit of the bounding box
+                    boxlimitRight = multiFaceLandmarks.get(0).getLandmarkList().get(454).getX()*viewGroup.getRight(); // *1080f make the right limit shorter
+                    boxlimitBottom = multiFaceLandmarks.get(0).getLandmarkList().get(152).getY()*viewGroup.getBottom();// *9120f make the bottom limit shorter
+                });
+        //round float values of landmarks
+
         // We use the tap gesture detector to switch between face effects. This allows users to try
         // multiple pre-bundled face effects without a need to recompile the app.
         // We use the tap gesture detector to hide the UI components.
@@ -206,9 +272,7 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
 
                             // TODO: Long press on face so that they can change the effect
                             @Override
-                            public void onLongPress(MotionEvent event) {
-                                HideAllUIComponents();
-                            }
+                            public void onLongPress(MotionEvent event) {HideMaterialComponents();}
 
                             // DONE: Hide UI when screen is tapped, ideally it should only hide the screenshot button since the Horizontal Scrollview with the preview effects should only appear when a long press is done,
                             @Override
@@ -241,6 +305,13 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
                     // Get the tag value of the button that was clicked and assign to material
                     int index = (int) v.getTag();
                     selectedEffectId = index;
+//                    timer.schedule(() -> previewMaterialLayout.setVisibility(View.GONE), 5000);
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            previewMaterialLayout.setVisibility(View.GONE);
+                        }
+                    }, 5000);
                 }
             });
 
@@ -252,7 +323,6 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
             @Override
             public void onClick(View v) {TakeScreenshot();}
         });
-//        setContentView(R.layout.activity_main);
     }
 
 
@@ -278,12 +348,12 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         String filename = "AugmentedFashionFace_" + dateFormat.format(now) + ".jpg";
 
         // Capture the bitmap of the camera view
-        HideAllUIComponents();
+        HideMaterialComponents();
 
         View cameraView = findViewById(R.id.preview_display_layout);
-        Bitmap cameraBitmap = GetCameraViewBitmap(viewGroup);
+        Bitmap cameraBitmap = GetCameraViewBitmap(cameraView);
         //Rect object based on screen's caracteristic
-        Rect rect = new Rect(viewGroup.getLeft(), viewGroup.getTop(), viewGroup.getRight(), viewGroup.getBottom());
+        Rect rect = new Rect(cameraView.getLeft(), cameraView.getTop(), cameraView.getRight(), cameraView.getBottom());
         //regarder la doc de cosumer pour faire commentaire
         Consumer<Bitmap> check= new Consumer<Bitmap>() {
             @Override
@@ -292,11 +362,11 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
             }
         };
         checkScreenshot(cameraBitmap, this, rect, check);
-        HideAllUIComponents();
+        HideMaterialComponents();
 
         /////OLD VERSION
         // Capture the bitmap of the rootView
-//        HideAllUIComponents();
+//        HideMaterialComponents();
 //        View rootView = getWindow().getDecorView().getRootView();
 //        rootView.setDrawingCacheEnabled(true);
 //        Bitmap rootViewBitmap = Bitmap.createBitmap(rootView.getDrawingCache());
@@ -477,14 +547,34 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
      * Hide all the components in one go, useful for when it comes to capturing
      * the screenshot so that only the camera view and face effect will be shown.
      */
-    private void HideAllUIComponents() {
-        MultipleToggleVisibility(screenshotButton, previewMaterialLayout);
+    private void HideMaterialComponents() {
+        if(lastTouchDownXY[1]>boxlimitTop && lastTouchDownXY[0]>boxlimitLeft && lastTouchDownXY[1]<boxlimitBottom && lastTouchDownXY[0]<boxlimitRight){
+//            MultipleToggleVisibility(screenshotButton, previewMaterialLayout);
+            ToggleVisibility(previewMaterialLayout);
+        }else{
+            Toast.makeText(this, "out of the face zone", Toast.LENGTH_SHORT).show();
+        }
+
 //        ToggleVisibility(previewMaterialLayout);
 //        ToggleVisibility(screenshotButton);
     }
 
     private void HideScreenShotComponent(){
-        ToggleVisibility(screenshotButton);
+//        if(clickY<boxlimitTop){
+//            Toast.makeText(this, "inf a la limite top"+clickY+"<"+boxlimitTop, Toast.LENGTH_SHORT).show();
+//        } else if (clickX<boxlimitLeft) {
+//            Toast.makeText(this, "inf a la limite gauche"+clickX+"<"+boxlimitLeft, Toast.LENGTH_SHORT).show();
+//        } else if (clickY>boxlimitBottom) {
+//            Toast.makeText(this, "sup a la limite bottom "+clickY+">"+boxlimitBottom, Toast.LENGTH_SHORT).show();
+//        } else if (clickX>boxlimitRight) {
+//            Toast.makeText(this, "sup a la limite droite "+clickX+">"+boxlimitRight, Toast.LENGTH_SHORT).show();
+//        }else
+        if (lastTouchDownXY[1]>boxlimitTop && lastTouchDownXY[0]>boxlimitLeft && lastTouchDownXY[1]<boxlimitBottom && lastTouchDownXY[0]<boxlimitRight){
+            ToggleVisibility(screenshotButton);
+//            Toast.makeText(this, "onClick: x = " + clickX + ", y = " + clickY, Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this, "out of the face zone", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /***************OVERRIDES**********************************/
@@ -504,4 +594,39 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
             }
         }
     }
+
+    //face landmarks
+
+    // the purpose of the touch listener is just to store the touch X,Y coordinates
+    View.OnTouchListener touchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+
+            // save the X,Y coordinates
+            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                lastTouchDownXY[0] = event.getX();
+                lastTouchDownXY[1] = event.getY();
+            }
+
+            // let the touch event pass on to whoever needs it
+            return false;
+        }
+    };
+
+    View.OnClickListener clickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Context context = getApplicationContext();
+            // retrieve the stored coordinates
+            double x = lastTouchDownXY[0];
+            double y = lastTouchDownXY[1];
+
+            // use the coordinates for whatever
+//            Log.i("TAG", "onLongClick: x = " + x + ", y = " + y);
+//            Toast.makeText(context, "onClick: x = " + x + ", y = " + y, Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    //BOUDNING BOX
+
 }
