@@ -75,8 +75,6 @@ import java.util.function.Consumer;
 import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmark;
 import com.google.mediapipe.formats.proto.LandmarkProto.NormalizedLandmarkList;
 import com.google.mediapipe.framework.AndroidPacketCreator;
-import java.text.DecimalFormat;
-import java.math.RoundingMode;
 //timer
 import java.util.Timer;
 import java.util.TimerTask;
@@ -113,19 +111,23 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
 
     // The ID for the face effect
     private int selectedEffectId;
+    //int object to compare if the original one has changed
+    private int selectedEffectIdPrevious = 0;
 
     private Button screenshotButton;
     private LinearLayout previewMaterialLayout;
+    private HorizontalScrollView horizontalScrollView;
     private GestureDetector tapGestureDetector;
 
     //face landmarks
     // class member variable to save the X,Y coordinates
     private float[] lastTouchDownXY = new float[2];
     private float boxlimitTop,boxlimitRight,boxlimitLeft,boxlimitBottom;
-    private DecimalFormat df = new DecimalFormat("#.#");
 
     //timer
     Timer timer = new Timer();
+    TimerTask timerTask;
+    private boolean timerHide=false;
 
 
     @Override
@@ -142,7 +144,7 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
 //        viewGroup.setOnClickListener(clickListener);
         screenshotButton = findViewById(R.id.screenshot_button);
         previewMaterialLayout = findViewById(R.id.preview_materials_layout);
-        HorizontalScrollView horizontalScrollView = findViewById(R.id.horizontal_scrollview);
+        horizontalScrollView = findViewById(R.id.horizontal_scrollview);
 
         // Face effect is 0 by default i.e. first effect.
         selectedEffectId = 0;
@@ -305,25 +307,53 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
                     // Get the tag value of the button that was clicked and assign to material
                     int index = (int) v.getTag();
                     selectedEffectId = index;
-//                    timer.schedule(() -> previewMaterialLayout.setVisibility(View.GONE), 5000);
-                    timer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            previewMaterialLayout.setVisibility(View.GONE);
-                        }
-                    }, 5000);
+//                    timerHide=true;
+//                    timer.schedule(timerTask = new TimerTask(){
+//                        @Override
+//                        public void run() {
+//                            //                   Toast.makeText(context, "Apparition au bout de 3s", Toast.LENGTH_SHORT).show();
+//                            //                    horizontalScrollView.setVisibility(View.GONE);
+//                            timerHide=true;
+//                        }
+//                    }, 3000);
                 }
             });
 
             // Add the button to the LinearLayout
             previewMaterialLayout.addView(button);
-        }
 
+        }
+//        if(timerHide){
+//            Toast.makeText(this, "Apparition au bout de 3s", Toast.LENGTH_SHORT).show();
+////            selectedEffectIdPrevious = selectedEffectId;
+//            timerHide=false;
+//        }
         screenshotButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {TakeScreenshot();}
         });
     }
+
+//    protected void timerHideScrollbarView(){
+////        if (selectedEffectId != selectedEffectIdPrevious || selectedEffectId == selectedEffectIdPrevious){
+////            Toast.makeText(this, selectedEffectId+" != "+selectedEffectIdPrevious, Toast.LENGTH_SHORT).show();
+////            timer.schedule(timerTask = new TimerTask(){
+////                @Override
+////                public void run() {
+//////                    Toast.makeText(context, "Apparition au bout de 3s", Toast.LENGTH_SHORT).show();
+//////                    horizontalScrollView.setVisibility(View.GONE);
+////                }
+////            }, 3000);
+//            if(timerHide){
+//                Toast.makeText(this, "Apparition au bout de 3s", Toast.LENGTH_SHORT).show();
+//                selectedEffectIdPrevious = selectedEffectId;
+//                timerHide=false;
+//            }
+////        }
+////        else {
+////            Toast.makeText(this, selectedEffectId+" == "+selectedEffectIdPrevious, Toast.LENGTH_SHORT).show();
+////        }
+//    }
 
 
     /**
@@ -348,7 +378,7 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         String filename = "AugmentedFashionFace_" + dateFormat.format(now) + ".jpg";
 
         // Capture the bitmap of the camera view
-        HideMaterialComponents();
+        HideAllComponents();
 
         View cameraView = findViewById(R.id.preview_display_layout);
         Bitmap cameraBitmap = GetCameraViewBitmap(cameraView);
@@ -362,11 +392,11 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
             }
         };
         checkScreenshot(cameraBitmap, this, rect, check);
-        HideMaterialComponents();
+        HideAllComponents();
 
         /////OLD VERSION
         // Capture the bitmap of the rootView
-//        HideMaterialComponents();
+//        HideAllComponents();
 //        View rootView = getWindow().getDecorView().getRootView();
 //        rootView.setDrawingCacheEnabled(true);
 //        Bitmap rootViewBitmap = Bitmap.createBitmap(rootView.getDrawingCache());
@@ -547,12 +577,18 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
      * Hide all the components in one go, useful for when it comes to capturing
      * the screenshot so that only the camera view and face effect will be shown.
      */
+    private void HideAllComponents() {
+        ToggleVisibility(previewMaterialLayout);
+        ToggleVisibility(screenshotButton);
+    }
+
+
     private void HideMaterialComponents() {
         if(lastTouchDownXY[1]>boxlimitTop && lastTouchDownXY[0]>boxlimitLeft && lastTouchDownXY[1]<boxlimitBottom && lastTouchDownXY[0]<boxlimitRight){
 //            MultipleToggleVisibility(screenshotButton, previewMaterialLayout);
-            ToggleVisibility(previewMaterialLayout);
+            ToggleVisibility(horizontalScrollView);
         }else{
-            Toast.makeText(this, "out of the face zone", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Press on your face", Toast.LENGTH_SHORT).show();
         }
 
 //        ToggleVisibility(previewMaterialLayout);
@@ -573,7 +609,7 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
             ToggleVisibility(screenshotButton);
 //            Toast.makeText(this, "onClick: x = " + clickX + ", y = " + clickY, Toast.LENGTH_SHORT).show();
         }else{
-            Toast.makeText(this, "out of the face zone", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Tap on your face", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -613,16 +649,16 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         }
     };
 
-    View.OnClickListener clickListener = new View.OnClickListener() {
+    View.OnClickListener hideScrollListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Context context = getApplicationContext();
-            // retrieve the stored coordinates
-            double x = lastTouchDownXY[0];
-            double y = lastTouchDownXY[1];
-
-            // use the coordinates for whatever
-//            Log.i("TAG", "onLongClick: x = " + x + ", y = " + y);
+//            Context context = getApplicationContext();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    horizontalScrollView.setVisibility(View.GONE);
+                }
+            }, 3000);
 //            Toast.makeText(context, "onClick: x = " + x + ", y = " + y, Toast.LENGTH_SHORT).show();
         }
     };
