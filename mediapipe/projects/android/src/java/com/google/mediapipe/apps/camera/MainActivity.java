@@ -228,30 +228,4 @@ public class MainActivity extends AppCompatActivity {
             });
   }
 
-//  protected Bitmap takeScreenshotBitmap(){
-//    Bitmap mBitmap = null; //peut être à mettre en commentaire
-////    if (mMediaProjection == null)
-////      return mBitmap;
-//
-//    Image image = mImageReader.acquireLatestImage();
-//    if (image == null)
-//      return mBitmap;
-//
-//    int width = image.getWidth();
-//    int height = image.getHeight();
-//    final Image.Plane[] planes = image.getPlanes();
-//    final ByteBuffer buffer = planes[0].getBuffer();
-//    int pixelStride = planes[0].getPixelStride();
-//    int rowStride = planes[0].getRowStride();
-//    int rowPadding = rowStride - pixelStride * width;
-//    mBitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
-//    mBitmap.copyPixelsFromBuffer(buffer);
-//    mBitmap = Bitmap.createBitmap(mBitmap, 0, 0, width, height);
-//    mImageReader.close();
-//    image.close();
-//
-//    return mBitmap;
-//  }
-
-
 }

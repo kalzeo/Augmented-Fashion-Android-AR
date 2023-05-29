@@ -78,6 +78,11 @@ import com.google.mediapipe.framework.AndroidPacketCreator;
 //timer
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+//import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -101,10 +106,10 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
     private static final String INPUT_NUM_FACES_SIDE_PACKET_NAME = "num_faces";
     private static final String OUTPUT_LANDMARKS_STREAM_NAME = "multi_face_landmarks";
     // Max number of faces to detect/process.
-    private static final int NUM_FACES = 1;
+    private static final int NUM_FACES = 2;
 
     private static final boolean USE_FACE_DETECTION_INPUT_SOURCE = false;
-    private static final boolean USE_FACE_LANDMARK_INPUT_SOURCE = true;
+
     private static final int MATRIX_TRANSLATION_Z_INDEX = 14;
 
     private final Object effectSelectionLock = new Object();
@@ -125,9 +130,9 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
     private float boxlimitTop,boxlimitRight,boxlimitLeft,boxlimitBottom;
 
     //timer
-    Timer timer = new Timer();
-    TimerTask timerTask;
-    private boolean timerHide=false;
+    private static boolean taskScheduled = false;
+    private Timer timer = new Timer(false);
+    private TimerTask timerTask;
 
 
     @Override
@@ -150,21 +155,23 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         selectedEffectId = 0;
 
         // Array to hold face effects
-        Drawable[] thumbnails = new Drawable[18]; // create an array to hold 18 drawables
+        Drawable[] thumbnails = new Drawable[12]; // create an array to hold 18 drawables
         //thumbnails[0] = cancelCircleDrawable;
 
         // Loop through the face resources and add the effect to the arraya
-        for (int i = 0; i < 18; i++) {
+        for (int i = 0; i < 12; i++) {
             String drawableName = "thumbnail_" + (i + 1);
             int resourceId = getResources().getIdentifier(drawableName, "drawable", getPackageName());
             thumbnails[i] = getResources().getDrawable(resourceId);
         }
 
         // Pass the USE_FACE_DETECTION_INPUT_SOURCE flag value as an input side packet into the graph.
+        Packet numFaces = processor.getPacketCreator().createInt32(NUM_FACES); //create a own packet for num faces detected
         Map<String, Packet> inputSidePackets = new HashMap<>();
         inputSidePackets.put(
                 USE_FACE_DETECTION_INPUT_SOURCE_INPUT_SIDE_PACKET_NAME,
                 processor.getPacketCreator().createBool(USE_FACE_DETECTION_INPUT_SOURCE));
+//        inputSidePackets.put(INPUT_NUM_FACES_SIDE_PACKET_NAME, numFaces);
         processor.setInputSidePackets(inputSidePackets);
 
 //         This callback demonstrates how the output face geometry packet can be obtained and used
@@ -199,30 +206,6 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
 //                                    + "]");
 //                });
 
-        ///////TEST///////////
-
-        //try to initialize face landmark
-//        AndroidPacketCreator packetCreator = processor.getPacketCreator();
-//        Map<String, Packet> faceinputSidePackets = new HashMap<>();
-//        faceinputSidePackets.put(INPUT_NUM_FACES_SIDE_PACKET_NAME, packetCreator.createInt32(NUM_FACES));
-//        processor.setInputSidePackets(faceinputSidePackets);
-
-//         To show verbose logging, run:
-//         adb shell setprop log.tag.MainActivity VERBOSE
-//        processor.addPacketCallback(
-//                OUTPUT_LANDMARKS_STREAM_NAME,
-//                (packet) -> {
-////                  Log.v(TAG, "Received multi face landmarks packet.");
-//                    List<NormalizedLandmarkList> multiFaceLandmarks =
-//                            PacketGetter.getProtoVector(packet, NormalizedLandmarkList.parser());
-//                    //initialize coordinates of the limit of the "bounding box"
-//                    boxlimitTop = multiFaceLandmarks.get(0).getLandmarkList().get(10).getY()*1920f;
-//                    boxlimitLeft = multiFaceLandmarks.get(0).getLandmarkList().get(234).getX()*1080f;
-//                    boxlimitRight = multiFaceLandmarks.get(0).getLandmarkList().get(152).getX()*1080f;
-//                    boxlimitBottom = multiFaceLandmarks.get(0).getLandmarkList().get(454).getY()*1920f;
-//                    });
-
-        /////////////////////
 
         // Alongside the input camera frame, we also send the `selected_effect_id` int32 packet to
         // indicate which effect should be rendered on this frame.
@@ -307,15 +290,7 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
                     // Get the tag value of the button that was clicked and assign to material
                     int index = (int) v.getTag();
                     selectedEffectId = index;
-//                    timerHide=true;
-//                    timer.schedule(timerTask = new TimerTask(){
-//                        @Override
-//                        public void run() {
-//                            //                   Toast.makeText(context, "Apparition au bout de 3s", Toast.LENGTH_SHORT).show();
-//                            //                    horizontalScrollView.setVisibility(View.GONE);
-//                            timerHide=true;
-//                        }
-//                    }, 3000);
+                    hideScrollbar();
                 }
             });
 
@@ -323,38 +298,60 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
             previewMaterialLayout.addView(button);
 
         }
-//        if(timerHide){
-//            Toast.makeText(this, "Apparition au bout de 3s", Toast.LENGTH_SHORT).show();
-////            selectedEffectIdPrevious = selectedEffectId;
-//            timerHide=false;
-//        }
+
         screenshotButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {TakeScreenshot();}
         });
+
+        //By default, in none action is done after the app launch, it automatically make disappear the scrollbar view
+        timer.schedule(new TimerTask() { //Schedules the specified task for execution after the specified delay
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {//Allow to modify UI as running on the UI thread (called main thread)
+                    public void run() {
+                        horizontalScrollView.setVisibility(View.GONE);
+                    }
+                });
+                taskScheduled = false;
+            }
+        }, 11000);
     }
 
-//    protected void timerHideScrollbarView(){
-////        if (selectedEffectId != selectedEffectIdPrevious || selectedEffectId == selectedEffectIdPrevious){
-////            Toast.makeText(this, selectedEffectId+" != "+selectedEffectIdPrevious, Toast.LENGTH_SHORT).show();
-////            timer.schedule(timerTask = new TimerTask(){
-////                @Override
-////                public void run() {
-//////                    Toast.makeText(context, "Apparition au bout de 3s", Toast.LENGTH_SHORT).show();
-//////                    horizontalScrollView.setVisibility(View.GONE);
-////                }
-////            }, 3000);
-//            if(timerHide){
-//                Toast.makeText(this, "Apparition au bout de 3s", Toast.LENGTH_SHORT).show();
-//                selectedEffectIdPrevious = selectedEffectId;
-//                timerHide=false;
-//            }
-////        }
-////        else {
-////            Toast.makeText(this, selectedEffectId+" == "+selectedEffectIdPrevious, Toast.LENGTH_SHORT).show();
-////        }
-//    }
-
+    /**
+     * Create a timer that hide the scrollbar view until a some amount of seconds
+     */
+    public void hideScrollbar(){
+        //timer to make disappear the scrollbar once we hit a effect button
+        if (!taskScheduled) {
+            taskScheduled = true; //mark the task scheduled
+            timer.schedule(new TimerTask() { //Schedules the specified task for execution after the specified delay
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {//Allow to modify UI as running on the UI thread (called main thread)
+                        public void run() {
+                            horizontalScrollView.setVisibility(View.GONE);
+                        }
+                    });
+                    taskScheduled = false;
+                }
+            }, 5000);
+        } else if (taskScheduled) {//if we hit the button while a task is already scheduled
+            timer.cancel(); //Terminates this timer, discarding any currently scheduled tasks to avoid that 2 timer.Schedule() works alongside
+            timer = new Timer(); //create a new one and then work as expected
+            timer.schedule(new TimerTask() { //Schedules the specified task for execution after the specified delay
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {//Allow to modify UI as running on the UI thread (called main thread)
+                        public void run() {
+                            horizontalScrollView.setVisibility(View.GONE);
+                        }
+                    });
+                    taskScheduled = false;
+                }
+            }, 5000);
+        }
+    }
 
     /**
      * Takes a screenshot and saves it to the devices storage. The GetCameraViewBitmap method needs
@@ -451,8 +448,6 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         startActivity(intent);
     }
 
-    ////////////////////
-
     /**
      *
      * @param bitmap
@@ -521,8 +516,6 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         }
     }
 
-    //////////////////
-
     /**
      * TODO
      * Fetch the current View of the camera so that it can be included in the screenshot.
@@ -585,14 +578,10 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
 
     private void HideMaterialComponents() {
         if(lastTouchDownXY[1]>boxlimitTop && lastTouchDownXY[0]>boxlimitLeft && lastTouchDownXY[1]<boxlimitBottom && lastTouchDownXY[0]<boxlimitRight){
-//            MultipleToggleVisibility(screenshotButton, previewMaterialLayout);
             ToggleVisibility(horizontalScrollView);
         }else{
             Toast.makeText(this, "Press on your face", Toast.LENGTH_SHORT).show();
         }
-
-//        ToggleVisibility(previewMaterialLayout);
-//        ToggleVisibility(screenshotButton);
     }
 
     private void HideScreenShotComponent(){
@@ -607,27 +596,8 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
 //        }else
         if (lastTouchDownXY[1]>boxlimitTop && lastTouchDownXY[0]>boxlimitLeft && lastTouchDownXY[1]<boxlimitBottom && lastTouchDownXY[0]<boxlimitRight){
             ToggleVisibility(screenshotButton);
-//            Toast.makeText(this, "onClick: x = " + clickX + ", y = " + clickY, Toast.LENGTH_SHORT).show();
         }else{
             Toast.makeText(this, "Tap on your face", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /***************OVERRIDES**********************************/
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return tapGestureDetector.onTouchEvent(event);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE_PERMISSION_WRITE_EXTERNAL_STORAGE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                TakeScreenshot();
-            } else {
-                Toast.makeText(this, "Permission to save screenshot denied", Toast.LENGTH_LONG).show();
-            }
         }
     }
 
@@ -649,20 +619,22 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         }
     };
 
-    View.OnClickListener hideScrollListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-//            Context context = getApplicationContext();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    horizontalScrollView.setVisibility(View.GONE);
-                }
-            }, 3000);
-//            Toast.makeText(context, "onClick: x = " + x + ", y = " + y, Toast.LENGTH_SHORT).show();
-        }
-    };
+    /***************OVERRIDES**********************************/
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return tapGestureDetector.onTouchEvent(event);
+    }
 
-    //BOUDNING BOX
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_PERMISSION_WRITE_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                TakeScreenshot();
+            } else {
+                Toast.makeText(this, "Permission to save screenshot denied", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 
 }

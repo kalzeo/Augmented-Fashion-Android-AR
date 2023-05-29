@@ -63,7 +63,7 @@ node {
   output_side_packet: "PACKET:1:with_attention"
   node_options: {
     [type.googleapis.com/mediapipe.ConstantSidePacketCalculatorOptions]: {
-      packet { int_value: 1 }
+      packet { int_value: 2 }
       packet { bool_value: true }
     }
   }
@@ -245,60 +245,6 @@ node {
         node_options: {
           [type.googleapis.com/mediapipe.FaceGeometryEffectRendererCalculatorOptions] {
             effect_texture_path: "mediapipe/graphs/face_effect/data/12.pngblob"
-          }
-        }
-      }
-
-    contained_node: {
-        calculator: "FaceGeometryEffectRendererCalculator"
-        node_options: {
-          [type.googleapis.com/mediapipe.FaceGeometryEffectRendererCalculatorOptions] {
-            effect_texture_path: "mediapipe/graphs/face_effect/data/13.pngblob"
-          }
-        }
-      }
-
-      contained_node: {
-        calculator: "FaceGeometryEffectRendererCalculator"
-        node_options: {
-          [type.googleapis.com/mediapipe.FaceGeometryEffectRendererCalculatorOptions] {
-            effect_texture_path: "mediapipe/graphs/face_effect/data/14.pngblob"
-          }
-        }
-      }
-
-      contained_node: {
-        calculator: "FaceGeometryEffectRendererCalculator"
-        node_options: {
-          [type.googleapis.com/mediapipe.FaceGeometryEffectRendererCalculatorOptions] {
-            effect_texture_path: "mediapipe/graphs/face_effect/data/15.pngblob"
-          }
-        }
-      }
-
-      contained_node: {
-        calculator: "FaceGeometryEffectRendererCalculator"
-        node_options: {
-          [type.googleapis.com/mediapipe.FaceGeometryEffectRendererCalculatorOptions] {
-            effect_texture_path: "mediapipe/graphs/face_effect/data/16.pngblob"
-          }
-        }
-      }
-
-      contained_node: {
-        calculator: "FaceGeometryEffectRendererCalculator"
-        node_options: {
-          [type.googleapis.com/mediapipe.FaceGeometryEffectRendererCalculatorOptions] {
-            effect_texture_path: "mediapipe/graphs/face_effect/data/17.pngblob"
-          }
-        }
-      }
-
-    contained_node: {
-        calculator: "FaceGeometryEffectRendererCalculator"
-        node_options: {
-          [type.googleapis.com/mediapipe.FaceGeometryEffectRendererCalculatorOptions] {
-            effect_texture_path: "mediapipe/graphs/face_effect/data/18.pngblob"
           }
         }
       }
