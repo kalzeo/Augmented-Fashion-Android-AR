@@ -381,10 +381,9 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
         Bitmap cameraBitmap = GetCameraViewBitmap(cameraView);
         //Rect object based on screen's caracteristic
         Rect rect = new Rect(cameraView.getLeft(), cameraView.getTop(), cameraView.getRight(), cameraView.getBottom());
-        //regarder la doc de cosumer pour faire commentaire
-        Consumer<Bitmap> check= new Consumer<Bitmap>() {
+        Consumer<Bitmap> check= new Consumer<Bitmap>() {//Represents an operation that accepts a single input argument and returns no result.
             @Override
-            public void accept(Bitmap bitmap) {
+            public void accept(Bitmap bitmap) {//Performs this operation on the given argument.
                 saveImage(bitmap, filename);
             }
         };
@@ -449,15 +448,17 @@ public class MainActivity extends com.google.mediapipe.apps.camera.MainActivity 
     }
 
     /**
-     *
+     * Copy into a given bitmap, the return value from PixelCopy.request and execute an operation from the given consumer
      * @param bitmap
      * @param activity
      * @param viewRect
      * @param onSuccess
      */
     private void checkScreenshot(Bitmap bitmap, Activity activity, Rect viewRect, Consumer<Bitmap> onSuccess) {
-//        Bitmap bitmap = Bitmap.createBitmap(viewRect.width(), viewRect.height(), Bitmap.Config.ARGB_8888);
-        //regarder doc pixelcopy pour faire commentaire
+        //Requests for the display content of a SurfaceView to be copied into a provided Bitmap.
+        //The contents of the source will be scaled to fit exactly inside the bitmap.
+        // The pixel format of the source buffer will be converted, as part of the copy, to fit the the bitmap's Bitmap.Config.
+        // The most recently queued buffer in the SurfaceView's Surface will be used as the source of the copy.
         PixelCopy.request(previewDisplayView, viewRect, bitmap,
                 (copyResult) -> {
                     if (copyResult == PixelCopy.SUCCESS) {
